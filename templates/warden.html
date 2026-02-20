@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Warden Approval Panel</title>
+	<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        max-width: 500px;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #2a5298;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-top: 10px;
+    }
+
+    input, textarea {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+
+    input:focus, textarea:focus {
+        border-color: #2a5298;
+        outline: none;
+        box-shadow: 0 0 5px rgba(42, 82, 152, 0.5);
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 20px;
+        background: #2a5298;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: #1e3c72;
+    }
+
+    .approve {
+        background: #28a745;
+    }
+
+    .approve:hover {
+        background: #218838;
+    }
+
+    .reject {
+        background: #dc3545;
+    }
+
+    .reject:hover {
+        background: #c82333;
+    }
+</style>
+
+</head>
+<body>
+
+<h2>Incoming Leave Requests</h2>
+
+{% for r in requests %}
+<p>{{ r.message }}</p>
+<hr>
+{% endfor %}
+<div class="container">
+    <h2>Warden Leave Approval</h2>
+<form action="/approve" method="post">
+
+Name: <input type="text" name="name"><br><br>
+Room No: <input type="text" name="room"><br><br>
+Reason: <input type="text" name="reason"><br><br>
+Days: <input type="text" name="days"><br><br>
+Start Date: <input type="text" name="start"><br><br>
+End Date: <input type="text" name="end"><br><br>
+
+Father WhatsApp: <input type="text" name="father"><br><br>
+Principal WhatsApp: <input type="text" name="principal"><br><br>
+Student WhatsApp: <input type="text" name="student"><br><br>
+
+     <button type="submit" class="approve">Approve</button>
+        <button type="submit" class="reject">Reject</button>
+    </form>
+</div>
+
+
+</form>
+
+</body>
+</html>
