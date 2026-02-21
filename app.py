@@ -6,9 +6,9 @@ import os
 app = Flask(__name__)
 
 # ---------------- TWILIO CONFIG ----------------
-account_sid = ""
-auth_token = ""
-twilio_number = ""
+account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
+twilio_number = "whatsapp:+14155238886"
 
 client = Client(account_sid, auth_token)
 
@@ -75,4 +75,5 @@ Approved by Warden.
 
 if __name__ == "__main__":
     app.run()
+
 
