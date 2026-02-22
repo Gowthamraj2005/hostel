@@ -1,3 +1,5 @@
 flask
 twilio
 gunicorn
+gspread
+google-auth
