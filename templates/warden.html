@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Warden Approval Panel</title>
 	<style>
     body {
@@ -16,13 +17,12 @@
 
     .container {
         background: white;
-        padding: 30px;
+        padding: 20px;
         border-radius: 12px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        width: 90%;
+        width: 95%;
         max-width: 500px;
-    }
-
+		box-sizing: border-box;
     h2 {
         text-align: center;
         margin-bottom: 20px;
@@ -95,20 +95,21 @@
 <hr>
 {% endfor %}
 <div class="container">
-    <h2>Warden Leave Approval</h2>
+    <h2>VYSYA COLLEGE LEAVE APPROVAL</h2>
 <form action="/approve" method="post">
 
 Name: <input type="text" name="name"><br><br>
 Room No: <input type="text" name="room"><br><br>
 Reason: <input type="text" name="reason"><br><br>
 Days: <input type="text" name="days"><br><br>
-Start Date: <input type="text" name="start"><br><br>
-End Date: <input type="text" name="end"><br><br>
-
-Father WhatsApp: <input type="text" name="father"><br><br>
-Principal WhatsApp: <input type="text" name="principal"><br><br>
-Student WhatsApp: <input type="text" name="student"><br><br>
-
+Start Date: <input type="date" name="start" required><br><br>
+End Date: <input type="date" name="end" required><br><br>
+Father Phone: 
+<input type="tel" name="father" pattern="[0-9]{10}" placeholder="10 digit number" required><br><br>
+Principal Phone: 
+<input type="tel" name="principal" value="9994415730" readonly><br><br>
+Student Phone: 
+<input type="tel" name="student" pattern="[0-9]{10}" placeholder="10 digit number" required><br><br>
      <button type="submit" class="approve">Approve</button>
         <button type="submit" class="reject">Reject</button>
     </form>
@@ -119,3 +120,4 @@ Student WhatsApp: <input type="text" name="student"><br><br>
 
 </body>
 </html>
+
