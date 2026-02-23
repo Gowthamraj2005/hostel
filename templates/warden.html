@@ -88,12 +88,6 @@
 </head>
 <body>
 
-<h2>Incoming Leave Requests</h2>
-
-{% for r in requests %}
-<p>{{ r.message }}</p>
-<hr>
-{% endfor %}
 <div class="container">
     <h2>VYSYA COLLEGE LEAVE APPROVAL</h2>
 <form action="/approve" method="post">
@@ -119,5 +113,6 @@ Student Phone:
 
 </body>
 </html>
+
 
 
