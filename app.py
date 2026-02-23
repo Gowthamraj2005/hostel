@@ -69,8 +69,10 @@ def approve():
     principal = request.form.get("principal")
     student = request.form.get("student")
 
+    action = request.form.get("action")  # Approved or Rejected
+
     message_body = f"""
-LEAVE APPROVED ✅
+LEAVE {action.upper()} 
 
 Student: {name}
 Room: {room}
@@ -79,31 +81,20 @@ Days: {days}
 Start Date: {start}
 End Date: {end}
 
-Approved by Warden.
+By Warden
 """
 
-    # Send WhatsApp
-    # Send WhatsApp
-for number in [father, principal, student]:
-    if number:
-        number = number.strip()
+    # Send message only if Approved
+    if action == "Approved":
+        for number in [father, principal, student]:
+            if number:
+                client.messages.create(
+                    from_=twilio_number,
+                    body=message_body,
+                    to=f"whatsapp:+91{number}"
+                )
 
-        # Remove + if user added it
-        if number.startswith("+"):
-            number = number[1:]
-
-        # If already has 91 prefix
-        if number.startswith("91") and len(number) == 12:
-            final_number = f"+{number}"
-        else:
-            final_number = f"+91{number}"
-
-        client.messages.create(
-            from_=twilio_number,
-            body=message_body,
-            to=f"whatsapp:{final_number}"
-        )
-    # ✅ Save to Google Sheets (INSIDE FUNCTION)
+    # Save to Google Sheets (for BOTH cases)
     save_to_google_sheets([
         name,
         room,
@@ -114,14 +105,14 @@ for number in [father, principal, student]:
         father,
         principal,
         student,
-        "Approved"
+        action
     ])
 
     return redirect("/")
 
-
 if __name__ == "__main__":
     app.run()
+
 
 
 
