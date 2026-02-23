@@ -83,7 +83,8 @@ Approved by Warden.
 """
 
     # Send WhatsApp
-    for number in [father, principal, student]:
+    # Send WhatsApp
+for number in [father, principal, student]:
     if number:
         number = number.strip()
 
@@ -91,7 +92,7 @@ Approved by Warden.
         if number.startswith("+"):
             number = number[1:]
 
-        # Remove 91 if already included
+        # If already has 91 prefix
         if number.startswith("91") and len(number) == 12:
             final_number = f"+{number}"
         else:
@@ -121,6 +122,7 @@ Approved by Warden.
 
 if __name__ == "__main__":
     app.run()
+
 
 
 
