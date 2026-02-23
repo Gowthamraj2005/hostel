@@ -84,13 +84,24 @@ Approved by Warden.
 
     # Send WhatsApp
     for number in [father, principal, student]:
-        if number:
-            client.messages.create(
-                from_=twilio_number,
-                body=message_body,
-                to=f"whatsapp:{number}"
-            )
+    if number:
+        number = number.strip()
 
+        # Remove + if user added it
+        if number.startswith("+"):
+            number = number[1:]
+
+        # Remove 91 if already included
+        if number.startswith("91") and len(number) == 12:
+            final_number = f"+{number}"
+        else:
+            final_number = f"+91{number}"
+
+        client.messages.create(
+            from_=twilio_number,
+            body=message_body,
+            to=f"whatsapp:{final_number}"
+        )
     # ✅ Save to Google Sheets (INSIDE FUNCTION)
     save_to_google_sheets([
         name,
@@ -110,6 +121,7 @@ Approved by Warden.
 
 if __name__ == "__main__":
     app.run()
+
 
 
 
