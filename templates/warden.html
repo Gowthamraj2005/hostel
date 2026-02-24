@@ -1,118 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warden Approval Panel</title>
-	<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(135deg, #1e3c72, #2a5298);
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-    }
-
-    .container {
-        background: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        width: 95%;
-        max-width: 500px;
-		box-sizing: border-box;
-    h2 {
-        text-align: center;
-        margin-bottom: 20px;
-        color: #2a5298;
-    }
-
-    label {
-        font-weight: bold;
-        display: block;
-        margin-top: 10px;
-    }
-
-    input, textarea {
-        width: 100%;
-        padding: 10px;
-        margin-top: 5px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        font-size: 14px;
-        transition: 0.3s;
-    }
-
-    input:focus, textarea:focus {
-        border-color: #2a5298;
-        outline: none;
-        box-shadow: 0 0 5px rgba(42, 82, 152, 0.5);
-    }
-
-    button {
-        width: 100%;
-        padding: 12px;
-        margin-top: 20px;
-        background: #2a5298;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-    button:hover {
-        background: #1e3c72;
-    }
-
-    .approve {
-        background: #28a745;
-    }
-
-    .approve:hover {
-        background: #218838;
-    }
-
-    .reject {
-        background: #dc3545;
-    }
-
-    .reject:hover {
-        background: #c82333;
-    }
-</style>
-
+    <title>Hostel Leave Panel</title>
 </head>
 <body>
+<form method="POST" action="/approve">
+    Roll Number: <input type="text" name="roll" required><br><br>
+    Reason: <input type="text" name="reason" required><br><br>
+    Days: <input type="number" name="days" required><br><br>
+    Start Date: <input type="date" name="start" required><br><br>
+    End Date: <input type="date" name="end" required><br><br>
+    Principal Phone: <input type="text" name="principal"><br><br>
 
-<div class="container">
-    <h2>VYSYA COLLEGE LEAVE APPROVAL</h2>
-<form action="/approve" method="post">
-
-Name: <input type="text" name="name"><br><br>
-Room No: <input type="text" name="room"><br><br>
-Reason: <input type="text" name="reason"><br><br>
-Days: <input type="text" name="days"><br><br>
-Start Date: <input type="date" name="start" required><br><br>
-End Date: <input type="date" name="end" required><br><br>
-Father Phone: 
-<input type="tel" name="father" pattern="[0-9]{10}" placeholder="10 digit number" required><br><br>
-Principal Phone: 
-<input type="tel" name="principal" value="9994415730" readonly><br><br>
-Student Phone: 
-<input type="tel" name="student" pattern="[0-9]{10}" placeholder="10 digit number" required><br><br>
-    <button type="submit" name="action" value="Approved" class="approve">Approve</button>
-<button type="submit" name="action" value="Rejected" class="reject">Reject</button>
-    </form>
-</div>
-
+    <button type="submit" name="action" value="Approved">Approve</button>
+    <button type="submit" name="action" value="Rejected">Reject</button>
 </form>
 
 </body>
 </html>
-
-
-
