@@ -122,9 +122,22 @@ def whatsapp_webhook():
 # WARDEN PANEL
 # ==============================
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def home():
-    return render_template("warden.html", requests=leave_requests)
+
+    student_data = None
+
+    if request.method == "POST":
+        roll = request.form.get("roll")
+
+        if roll:
+            student = get_student(roll)
+            if student:
+                student_data = student
+
+    return render_template("warden.html", 
+                           requests=leave_requests,
+                           student=student_data)
 
 
 # ==============================
@@ -230,3 +243,4 @@ def add_student():
 
 if __name__ == "__main__":
     app.run()
+
