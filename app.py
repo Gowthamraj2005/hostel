@@ -40,11 +40,9 @@ def init_db():
 
 # Initialize table at startup
 init_db()
-
-
 def get_student_details(roll_number):
     conn = get_db_connection()
-    cur = conn.cursor()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     cur.execute("""
         SELECT name, room, student_phone, parent_phone
@@ -58,8 +56,6 @@ def get_student_details(roll_number):
     conn.close()
 
     return result
-
-
 # ==============================
 # GOOGLE SHEETS CONFIG
 # ==============================
@@ -243,5 +239,6 @@ def add_student():
 
 if __name__ == "__main__":
     app.run()
+
 
 
