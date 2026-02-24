@@ -58,21 +58,23 @@
 
 {% if student %}
 <form method="POST" action="/approve">
+Roll Number:
+<input type="text" name="roll" value="{{ student.roll_number if student else '' }}" required><br><br>
 
-    Roll Number:<br>
-    <input type="text" name="roll" value="{{ student.roll_number }}" readonly><br><br>
+Student Name:
+<input type="text" name="name" value="{{ student.name if student else '' }}" readonly><br><br>
 
-    Student Name:<br>
-    <input type="text" value="{{ student.name }}" readonly><br><br>
+Room:
+<input type="text" name="room" value="{{ student.room if student else '' }}" readonly><br><br>
 
-    Student Phone:<br>
-    <input type="text" value="{{ student.student_phone }}" readonly><br><br>
+Student Phone:
+<input type="text" name="student_phone" value="{{ student.student_phone if student else '' }}" readonly><br><br>
 
-    Parent Phone:<br>
-    <input type="text" value="{{ student.parent_phone }}" readonly><br><br>
+Parent Phone:
+<input type="text" name="parent_phone" value="{{ student.parent_phone if student else '' }}" readonly><br><br>
 
-    Principal Phone:<br>
-    <input type="text" name="principal" value="9994415730" readonly><br><br>
+Principal Phone:
+<input type="text" name="principal" value="9994415730"><br><br>
 
     Reason:<br>
     <input type="text" name="reason" required><br><br>
@@ -115,4 +117,5 @@
 
 </body>
 </html>
+
 
