@@ -4,6 +4,7 @@ from datetime import datetime
 
 from flask import Flask, request, render_template, redirect
 import psycopg2
+from psycopg2.extras import DictCursor
 import gspread
 from google.oauth2.service_account import Credentials
 from twilio.rest import Client
@@ -42,8 +43,7 @@ def init_db():
 init_db()
 def get_student_details(roll_number):
     conn = get_db_connection()
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
+    cur = conn.cursor(cursor_factory=DictCursor)
     cur.execute("""
         SELECT name, room, student_phone, parent_phone
         FROM students
@@ -239,6 +239,7 @@ def add_student():
 
 if __name__ == "__main__":
     app.run()
+
 
 
 
