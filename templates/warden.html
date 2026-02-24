@@ -1,103 +1,96 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warden Approval Panel</title>
-	<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(135deg, #1e3c72, #2a5298);
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-    }
+    <title>Hostel Leave Panel</title>
+    <style>
+        body {
+            font-family: Arial;
+            background-color: #2f4f88;
+            color: white;
+            text-align: center;
+        }
 
-    .container {
-        background: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        width: 95%;
-        max-width: 500px;
-		box-sizing: border-box;
-    h2 {
-        text-align: center;
-        margin-bottom: 20px;
-        color: #2a5298;
-    }
+        form {
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            color: black;
+            width: 350px;
+            border-radius: 10px;
+        }
 
-    label {
-        font-weight: bold;
-        display: block;
-        margin-top: 10px;
-    }
+        input {
+            width: 90%;
+            padding: 5px;
+        }
 
-    input, textarea {
-        width: 100%;
-        padding: 10px;
-        margin-top: 5px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        font-size: 14px;
-        transition: 0.3s;
-    }
+        button {
+            padding: 6px 12px;
+            margin: 5px;
+        }
 
-    input:focus, textarea:focus {
-        border-color: #2a5298;
-        outline: none;
-        box-shadow: 0 0 5px rgba(42, 82, 152, 0.5);
-    }
-
-    button {
-        width: 100%;
-        padding: 12px;
-        margin-top: 20px;
-        background: #2a5298;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-    button:hover {
-        background: #1e3c72;
-    }
-
-    .approve {
-        background: #28a745;
-    }
-
-    .approve:hover {
-        background: #218838;
-    }
-
-    .reject {
-        background: #dc3545;
-    }
-
-    .reject:hover {
-        background: #c82333;
-    }
-</style>
+        hr {
+            margin: 40px 0;
+        }
+    </style>
 </head>
 <body>
+
+<h2>Leave Requests</h2>
+
+{% for req in requests %}
+    <p><b>{{ req.sender }}</b> - {{ req.message }} ({{ req.time }})</p>
+{% endfor %}
+
+<hr>
+
+<h2>Approve / Reject Leave</h2>
+
 <form method="POST" action="/approve">
-    Roll Number: <input type="text" name="roll" required><br><br>
-    Reason: <input type="text" name="reason" required><br><br>
-    Days: <input type="number" name="days" required><br><br>
-    Start Date: <input type="date" name="start" required><br><br>
-    End Date: <input type="date" name="end" required><br><br>
-    Principal Phone: <input type="text" name="principal"><br><br>
+    Roll Number:<br>
+    <input type="text" name="roll" required><br><br>
+
+    Reason:<br>
+    <input type="text" name="reason" required><br><br>
+
+    Days:<br>
+    <input type="number" name="days" required><br><br>
+
+    Start Date:<br>
+    <input type="date" name="start" required><br><br>
+
+    End Date:<br>
+    <input type="date" name="end" required><br><br>
+
+    Principal Phone:<br>
+    <input type="text" name="principal"><br><br>
 
     <button type="submit" name="action" value="Approved">Approve</button>
     <button type="submit" name="action" value="Rejected">Reject</button>
 </form>
 
+<hr>
+
+<h2>Add Student (Admin)</h2>
+
+<form method="POST" action="/add-student">
+    Roll Number:<br>
+    <input type="text" name="roll" required><br><br>
+
+    Name:<br>
+    <input type="text" name="name" required><br><br>
+
+    Room:<br>
+    <input type="text" name="room"><br><br>
+
+    Student Phone:<br>
+    <input type="text" name="student_phone"><br><br>
+
+    Parent Phone:<br>
+    <input type="text" name="parent_phone"><br><br>
+
+    <button type="submit">Add / Update Student</button>
+</form>
+
 </body>
 </html>
-
