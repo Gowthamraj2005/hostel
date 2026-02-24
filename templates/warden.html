@@ -46,9 +46,33 @@
 
 <h2>Approve / Reject Leave</h2>
 
-<form method="POST" action="/approve">
+<form method="POST" action="/">
+
     Roll Number:<br>
     <input type="text" name="roll" required><br><br>
+
+    <button type="submit">Fetch Student</button>
+</form>
+
+<hr>
+
+{% if student %}
+<form method="POST" action="/approve">
+
+    Roll Number:<br>
+    <input type="text" name="roll" value="{{ student.roll_number }}" readonly><br><br>
+
+    Student Name:<br>
+    <input type="text" value="{{ student.name }}" readonly><br><br>
+
+    Student Phone:<br>
+    <input type="text" value="{{ student.student_phone }}" readonly><br><br>
+
+    Parent Phone:<br>
+    <input type="text" value="{{ student.parent_phone }}" readonly><br><br>
+
+    Principal Phone:<br>
+    <input type="text" name="principal" value="9994415730" readonly><br><br>
 
     Reason:<br>
     <input type="text" name="reason" required><br><br>
@@ -62,13 +86,10 @@
     End Date:<br>
     <input type="date" name="end" required><br><br>
 
-    Principal Phone:<br>
-    <input type="text" name="principal"><br><br>
-
     <button type="submit" name="action" value="Approved">Approve</button>
     <button type="submit" name="action" value="Rejected">Reject</button>
 </form>
-
+{% endif %}
 <hr>
 
 <h2>Add Student (Admin)</h2>
@@ -94,3 +115,4 @@
 
 </body>
 </html>
+
