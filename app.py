@@ -131,7 +131,7 @@ def home():
         roll = request.form.get("roll")
 
         if roll:
-            student = get_student(roll)
+            student = get_student_details(roll)
             if student:
                 student_data = student
 
@@ -243,4 +243,5 @@ def add_student():
 
 if __name__ == "__main__":
     app.run()
+
 
