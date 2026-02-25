@@ -28,6 +28,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS students (
             roll_number VARCHAR(20) PRIMARY KEY,
             name VARCHAR(100),
+            department VARCHAR(20),
             room VARCHAR(20),
             student_phone VARCHAR(15),
             parent_phone VARCHAR(15)
@@ -45,7 +46,7 @@ def get_student_details(roll_number):
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=DictCursor)
     cur.execute("""
-        SELECT name, room, student_phone, parent_phone
+        SELECT name, room, department,student_phone, parent_phone
         FROM students
         WHERE roll_number = %s
     """, (roll_number,))
@@ -156,13 +157,14 @@ def approve():
     if not student_data:
         return "Student not found"
 
-    name, room, student_phone, parent_phone = student_data
+    name, room,department, student_phone, parent_phone = student_data
 
     message_body = f"""
 LEAVE {action.upper()}
 
 Student: {name}
 Roll No: {roll_number}
+Department&Year:{department}
 Room: {room}
 Reason: {reason}
 Days: {days}
@@ -186,6 +188,7 @@ By Warden
     save_to_google_sheets([
         roll_number,
         name,
+        department,
         room,
         reason,
         days,
@@ -209,6 +212,7 @@ def add_student():
 
     roll = request.form.get("roll")
     name = request.form.get("name")
+    department= request.form.get("department")
     room = request.form.get("room")
     student_phone = request.form.get("student_phone")
     parent_phone = request.form.get("parent_phone")
@@ -217,7 +221,7 @@ def add_student():
     cur = conn.cursor()
 
     cur.execute("""
-        INSERT INTO students (roll_number, name, room, student_phone, parent_phone)
+        INSERT INTO students (roll_number, name,department, room, student_phone, parent_phone)
         VALUES (%s, %s, %s, %s, %s)
         ON CONFLICT (roll_number) DO UPDATE
         SET name = EXCLUDED.name,
@@ -239,6 +243,7 @@ def add_student():
 
 if __name__ == "__main__":
     app.run()
+
 
 
 
