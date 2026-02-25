@@ -208,11 +208,12 @@ By Warden
 # ==============================
 
 @app.route("/add-student", methods=["POST"])
+@app.route("/add-student", methods=["POST"])
 def add_student():
 
     roll = request.form.get("roll")
     name = request.form.get("name")
-    department= request.form.get("department")
+    department = request.form.get("department")
     room = request.form.get("room")
     student_phone = request.form.get("student_phone")
     parent_phone = request.form.get("parent_phone")
@@ -221,20 +222,21 @@ def add_student():
     cur = conn.cursor()
 
     cur.execute("""
-        INSERT INTO students (roll_number, name,department, room, student_phone, parent_phone)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO students (roll_number, name, department, room, student_phone, parent_phone)
+        VALUES (%s, %s, %s, %s, %s, %s)
         ON CONFLICT (roll_number) DO UPDATE
         SET name = EXCLUDED.name,
+            department = EXCLUDED.department,
             room = EXCLUDED.room,
             student_phone = EXCLUDED.student_phone,
             parent_phone = EXCLUDED.parent_phone
-    """, (roll, name, room, student_phone, parent_phone))
+    """, (roll, name, department, room, student_phone, parent_phone))
 
     conn.commit()
     cur.close()
     conn.close()
 
-    return "Student Added / Updated Successfully"
+    return redirect("/")
 
 
 # ==============================
@@ -243,6 +245,7 @@ def add_student():
 
 if __name__ == "__main__":
     app.run()
+
 
 
 
