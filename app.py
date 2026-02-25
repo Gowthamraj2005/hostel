@@ -9,16 +9,14 @@ import gspread
 from google.oauth2.service_account import Credentials
 from twilio.rest import Client
 
-
 app = Flask(__name__)
 
-# ==============================
+# =====================================================
 # DATABASE CONNECTION (PostgreSQL)
-# ==============================
+# =====================================================
 
 def get_db_connection():
     return psycopg2.connect(os.environ.get("DATABASE_URL"))
-
 
 def init_db():
     conn = get_db_connection()
@@ -28,7 +26,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS students (
             roll_number VARCHAR(20) PRIMARY KEY,
             name VARCHAR(100),
-            department VARCHAR(20),
+            department VARCHAR(50),
             room VARCHAR(20),
             student_phone VARCHAR(15),
             parent_phone VARCHAR(15)
@@ -39,17 +37,18 @@ def init_db():
     cur.close()
     conn.close()
 
-
-# Initialize table at startup
 init_db()
+
+
 def get_student_details(roll_number):
-    roll_number = roll_number.strip()
+    roll_number = roll_number.strip().upper()
 
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=DictCursor)
 
     cur.execute("""
-        SELECT roll_number, name, room, department, student_phone, parent_phone
+        SELECT roll_number, name, department, room,
+               student_phone, parent_phone
         FROM students
         WHERE roll_number = %s
     """, (roll_number,))
@@ -60,9 +59,11 @@ def get_student_details(roll_number):
     conn.close()
 
     return result
-# ==============================
-# GOOGLE SHEETS CONFIG
-# ==============================
+
+
+# =====================================================
+# GOOGLE SHEETS
+# =====================================================
 
 def save_to_google_sheets(data):
 
@@ -81,9 +82,9 @@ def save_to_google_sheets(data):
     sheet.append_row(data)
 
 
-# ==============================
+# =====================================================
 # TWILIO CONFIG
-# ==============================
+# =====================================================
 
 account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
 auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
@@ -92,20 +93,15 @@ twilio_number = "whatsapp:+14155238886"
 client = Client(account_sid, auth_token)
 
 
-# ==============================
-# TEMP STORAGE (Webhook Messages)
-# ==============================
+# =====================================================
+# TEMP STORAGE (Webhook)
+# =====================================================
 
 leave_requests = []
 
 
-# ==============================
-# RECEIVE STUDENT WHATSAPP MESSAGE
-# ==============================
-
 @app.route("/webhook", methods=["POST"])
 def whatsapp_webhook():
-
     msg = request.form.get("Body")
     sender = request.form.get("From")
 
@@ -118,9 +114,9 @@ def whatsapp_webhook():
     return "Received", 200
 
 
-# ==============================
+# =====================================================
 # WARDEN PANEL
-# ==============================
+# =====================================================
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -131,23 +127,21 @@ def home():
         roll = request.form.get("roll")
 
         if roll:
-            student = get_student_details(roll)
-            if student:
-                student_data = student
+            student_data = get_student_details(roll)
 
-    return render_template("warden.html", 
+    return render_template("warden.html",
                            requests=leave_requests,
                            student=student_data)
 
 
-# ==============================
-# APPROVE / REJECT LEAVE
-# ==============================
+# =====================================================
+# APPROVE / REJECT
+# =====================================================
 
 @app.route("/approve", methods=["POST"])
 def approve():
 
-    roll_number = request.form.get("roll")
+    roll_number = request.form.get("roll").strip().upper()
     reason = request.form.get("reason")
     start = request.form.get("start")
     end = request.form.get("end")
@@ -155,19 +149,23 @@ def approve():
     principal = request.form.get("principal")
     action = request.form.get("action")
 
-    student_data = get_student_details(roll_number)
+    student = get_student_details(roll_number)
 
-    if not student_data:
+    if not student:
         return "Student not found"
 
-    name, room,department, student_phone, parent_phone = student_data
+    name = student["name"]
+    department = student["department"]
+    room = student["room"]
+    student_phone = student["student_phone"]
+    parent_phone = student["parent_phone"]
 
     message_body = f"""
 LEAVE {action.upper()}
 
 Student: {name}
 Roll No: {roll_number}
-Department&Year:{department}
+Department & Year: {department}
 Room: {room}
 Reason: {reason}
 Days: {days}
@@ -187,7 +185,7 @@ By Warden
                     to=f"whatsapp:+91{number}"
                 )
 
-    # Save to Google Sheets (for both Approved & Rejected)
+    # Save to Google Sheets
     save_to_google_sheets([
         roll_number,
         name,
@@ -206,15 +204,14 @@ By Warden
     return redirect("/")
 
 
-# ==============================
-# ADD STUDENT (Admin Route)
-# ==============================
+# =====================================================
+# ADD / UPDATE STUDENT
+# =====================================================
 
-@app.route("/add-student", methods=["POST"])
 @app.route("/add-student", methods=["POST"])
 def add_student():
 
-    roll = request.form.get("roll")
+    roll = request.form.get("roll").strip().upper()
     name = request.form.get("name")
     department = request.form.get("department")
     room = request.form.get("room")
@@ -242,16 +239,9 @@ def add_student():
     return redirect("/")
 
 
-# ==============================
-# RUN APP
-# ==============================
+# =====================================================
+# RUN
+# =====================================================
 
 if __name__ == "__main__":
     app.run()
-
-
-
-
-
-
-
