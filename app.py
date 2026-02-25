@@ -43,10 +43,13 @@ def init_db():
 # Initialize table at startup
 init_db()
 def get_student_details(roll_number):
+    roll_number = roll_number.strip()
+
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=DictCursor)
+
     cur.execute("""
-        SELECT name, room, department,student_phone, parent_phone
+        SELECT roll_number, name, room, department, student_phone, parent_phone
         FROM students
         WHERE roll_number = %s
     """, (roll_number,))
@@ -245,6 +248,7 @@ def add_student():
 
 if __name__ == "__main__":
     app.run()
+
 
 
 
