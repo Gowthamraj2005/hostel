@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import requests
 from datetime import datetime
 
@@ -7,16 +8,22 @@ from flask import Flask, request, render_template, redirect
 import psycopg2
 from psycopg2.extras import DictCursor
 import gspread
+from gspread.exceptions import APIError
 from google.oauth2.service_account import Credentials
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "hostel-secret")
 
 # =====================================================
 # DATABASE CONNECTION (PostgreSQL)
 # =====================================================
 
 def get_db_connection():
-    return psycopg2.connect(os.environ.get("DATABASE_URL"))
+    return psycopg2.connect(
+        os.environ.get("DATABASE_URL"),
+        sslmode="require"
+    )
+
 
 def init_db():
     conn = get_db_connection()
@@ -36,6 +43,7 @@ def init_db():
     conn.commit()
     cur.close()
     conn.close()
+
 
 init_db()
 
@@ -67,19 +75,32 @@ def get_student_details(roll_number):
 
 def save_to_google_sheets(data):
 
-    creds_json = json.loads(os.environ.get("GOOGLE_CREDENTIALS"))
+    try:
+        creds_json = json.loads(os.environ.get("GOOGLE_CREDENTIALS"))
 
-    credentials = Credentials.from_service_account_info(
-        creds_json,
-        scopes=[
-            "https://www.googleapis.com/auth/spreadsheets",
-            "https://www.googleapis.com/auth/drive"
-        ],
-    )
+        credentials = Credentials.from_service_account_info(
+            creds_json,
+            scopes=[
+                "https://www.googleapis.com/auth/spreadsheets",
+                "https://www.googleapis.com/auth/drive"
+            ],
+        )
 
-    gc = gspread.authorize(credentials)
-    sheet = gc.open("Hostel Leave Records").sheet1
-    sheet.append_row(data)
+        gc = gspread.authorize(credentials)
+
+        for attempt in range(3):
+            try:
+                sheet = gc.open("Hostel Leave Records").sheet1
+                sheet.append_row(data)
+                return True
+            except APIError as e:
+                print("Google Sheets API error:", e)
+                time.sleep(3)
+
+    except Exception as e:
+        print("Google Sheets connection error:", e)
+
+    return False
 
 
 # =====================================================
@@ -92,27 +113,37 @@ PHONE_NUMBER_ID = os.environ.get("PHONE_NUMBER_ID")
 
 def send_whatsapp_message(phone, message):
 
-    url = f"https://graph.facebook.com/v18.0/{PHONE_NUMBER_ID}/messages"
+    try:
 
-    headers = {
-        "Authorization": f"Bearer {WHATSAPP_TOKEN}",
-        "Content-Type": "application/json"
-    }
+        if not phone:
+            return
 
-    data = {
-        "messaging_product": "whatsapp",
-        "to": f"91{phone}",
-        "type": "text",
-        "text": {
-            "body": message
+        url = f"https://graph.facebook.com/v18.0/{PHONE_NUMBER_ID}/messages"
+
+        headers = {
+            "Authorization": f"Bearer {WHATSAPP_TOKEN}",
+            "Content-Type": "application/json"
         }
-    }
 
-    requests.post(url, headers=headers, json=data)
+        data = {
+            "messaging_product": "whatsapp",
+            "to": f"91{phone}",
+            "type": "text",
+            "text": {
+                "body": message
+            }
+        }
+
+        response = requests.post(url, headers=headers, json=data)
+
+        print("WhatsApp response:", response.text)
+
+    except Exception as e:
+        print("WhatsApp send error:", e)
 
 
 # =====================================================
-# TEMP STORAGE (Webhook)
+# TEMP STORAGE (Webhook Messages)
 # =====================================================
 
 leave_requests = []
@@ -120,6 +151,7 @@ leave_requests = []
 
 @app.route("/webhook", methods=["POST"])
 def whatsapp_webhook():
+
     msg = request.form.get("Body")
     sender = request.form.get("From")
 
@@ -142,14 +174,17 @@ def home():
     student_data = None
 
     if request.method == "POST":
+
         roll = request.form.get("roll")
 
         if roll:
             student_data = get_student_details(roll)
 
-    return render_template("warden.html",
-                           requests=leave_requests,
-                           student=student_data)
+    return render_template(
+        "warden.html",
+        requests=leave_requests,
+        student=student_data
+    )
 
 
 # =====================================================
@@ -196,25 +231,32 @@ By Warden
 
     # Send WhatsApp only if Approved
     if action == "Approved":
+
         for number in [parent_phone, principal, student_phone]:
+
             if number:
                 send_whatsapp_message(number, message_body)
 
     # Save to Google Sheets
-    save_to_google_sheets([
-        roll_number,
-        name,
-        department,
-        room,
-        reason,
-        days,
-        start,
-        end,
-        parent_phone,
-        student_phone,
-        action,
-        datetime.now().strftime("%Y-%m-%d %H:%M")
-    ])
+    try:
+
+        save_to_google_sheets([
+            roll_number,
+            name,
+            department,
+            room,
+            reason,
+            days,
+            start,
+            end,
+            parent_phone,
+            student_phone,
+            action,
+            datetime.now().strftime("%Y-%m-%d %H:%M")
+        ])
+
+    except Exception as e:
+        print("Sheet save failed:", e)
 
     return redirect("/")
 
