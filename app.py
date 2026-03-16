@@ -111,36 +111,42 @@ WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN")
 PHONE_NUMBER_ID = os.environ.get("PHONE_NUMBER_ID")
 
 
-def send_whatsapp_message(phone, message):
+def send_whatsapp_message(phone, action, name, roll, dept, room, reason, days, start, end):
 
-    try:
+    url = f"https://graph.facebook.com/v18.0/{PHONE_NUMBER_ID}/messages"
 
-        if not phone:
-            return
+    headers = {
+        "Authorization": f"Bearer {WHATSAPP_TOKEN}",
+        "Content-Type": "application/json"
+    }
 
-        url = f"https://graph.facebook.com/v18.0/{PHONE_NUMBER_ID}/messages"
-
-        headers = {
-            "Authorization": f"Bearer {WHATSAPP_TOKEN}",
-            "Content-Type": "application/json"
+    data = {
+        "messaging_product": "whatsapp",
+        "to": f"91{phone}",
+        "type": "template",
+        "template": {
+            "name": "leave_status",
+            "language": {"code": "en"},
+            "components": [
+                {
+                    "type": "body",
+                    "parameters": [
+                        {"type": "text", "text": action},
+                        {"type": "text", "text": name},
+                        {"type": "text", "text": roll},
+                        {"type": "text", "text": dept},
+                        {"type": "text", "text": room},
+                        {"type": "text", "text": reason},
+                        {"type": "text", "text": days},
+                        {"type": "text", "text": start},
+                        {"type": "text", "text": end}
+                    ]
+                }
+            ]
         }
+    }
 
-        data = {
-            "messaging_product": "whatsapp",
-            "to": f"91{phone}",
-            "type": "text",
-            "text": {
-                "body": message
-            }
-        }
-
-        response = requests.post(url, headers=headers, json=data)
-
-        print("WhatsApp response:", response.text)
-
-    except Exception as e:
-        print("WhatsApp send error:", e)
-
+    requests.post(url, headers=headers, json=data)
 
 # =====================================================
 # TEMP STORAGE (Webhook Messages)
@@ -235,7 +241,18 @@ By Warden
         for number in [parent_phone, principal, student_phone]:
 
             if number:
-                send_whatsapp_message(number, message_body)
+                send_whatsapp_message(
+    number,
+    action,
+    name,
+    roll_number,
+    department,
+    room,
+    reason,
+    days,
+    start,
+    end
+)
 
     # Save to Google Sheets
     try:
