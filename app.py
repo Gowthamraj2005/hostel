@@ -55,10 +55,7 @@ def get_student_details(roll_number):
     cur = conn.cursor(cursor_factory=DictCursor)
 
     cur.execute("""
-        SELECT roll_number, name, department, room,
-               student_phone, parent_phone
-        FROM students
-        WHERE roll_number = %s
+        SELECT * FROM students WHERE roll_number = %s
     """, (roll_number,))
 
     result = cur.fetchone()
@@ -74,7 +71,6 @@ def get_student_details(roll_number):
 # =====================================================
 
 def save_to_google_sheets(data):
-
     try:
         creds_json = json.loads(os.environ.get("GOOGLE_CREDENTIALS"))
 
@@ -104,11 +100,18 @@ def save_to_google_sheets(data):
 
 
 # =====================================================
-# META WHATSAPP CLOUD API
+# WHATSAPP API (META)
 # =====================================================
 
 WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN")
 PHONE_NUMBER_ID = os.environ.get("PHONE_NUMBER_ID")
+
+
+def format_phone(phone):
+    phone = phone.strip().replace("+", "")
+    if not phone.startswith("91"):
+        phone = "91" + phone
+    return phone
 
 
 def send_whatsapp_message(phone, action, name, roll, dept, room, reason, days, start, end):
@@ -122,31 +125,35 @@ def send_whatsapp_message(phone, action, name, roll, dept, room, reason, days, s
 
     data = {
         "messaging_product": "whatsapp",
-        "to": f"91{phone}",
+        "to": format_phone(phone),
         "type": "template",
         "template": {
             "name": "leave_status",
             "language": {"code": "en"},
-            "components": [
-                {
-                    "type": "body",
-                    "parameters": [
-                        {"type": "text", "text": action},
-                        {"type": "text", "text": name},
-                        {"type": "text", "text": roll},
-                        {"type": "text", "text": dept},
-                        {"type": "text", "text": room},
-                        {"type": "text", "text": reason},
-                        {"type": "text", "text": days},
-                        {"type": "text", "text": start},
-                        {"type": "text", "text": end}
-                    ]
-                }
-            ]
+            "components": [{
+                "type": "body",
+                "parameters": [
+                    {"type": "text", "text": action},
+                    {"type": "text", "text": name},
+                    {"type": "text", "text": roll},
+                    {"type": "text", "text": dept},
+                    {"type": "text", "text": room},
+                    {"type": "text", "text": reason},
+                    {"type": "text", "text": days},
+                    {"type": "text", "text": start},
+                    {"type": "text", "text": end}
+                ]
+            }]
         }
     }
 
-    requests.post(url, headers=headers, json=data)
+    try:
+        res = requests.post(url, headers=headers, json=data)
+        print("WhatsApp Status:", res.status_code)
+        print("WhatsApp Response:", res.text)
+    except Exception as e:
+        print("WhatsApp Error:", e)
+
 
 # =====================================================
 # TEMP STORAGE (Webhook Messages)
@@ -157,7 +164,6 @@ leave_requests = []
 
 @app.route("/webhook", methods=["POST"])
 def whatsapp_webhook():
-
     msg = request.form.get("Body")
     sender = request.form.get("From")
 
@@ -176,11 +182,9 @@ def whatsapp_webhook():
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-
     student_data = None
 
     if request.method == "POST":
-
         roll = request.form.get("roll")
 
         if roll:
@@ -219,61 +223,39 @@ def approve():
     student_phone = student["student_phone"]
     parent_phone = student["parent_phone"]
 
-    message_body = f"""
-LEAVE {action.upper()}
-
-Student: {name}
-Roll No: {roll_number}
-Department & Year: {department}
-Room: {room}
-
-Reason: {reason}
-Days: {days}
-Start: {start}
-End: {end}
-
-By Warden
-"""
-
-    # Send WhatsApp only if Approved
+    # SEND ONLY IF APPROVED
     if action == "Approved":
 
         for number in [parent_phone, principal, student_phone]:
-
             if number:
                 send_whatsapp_message(
-    number,
-    action,
-    name,
-    roll_number,
-    department,
-    room,
-    reason,
-    days,
-    start,
-    end
-)
+                    number,
+                    action,
+                    name,
+                    roll_number,
+                    department,
+                    room,
+                    reason,
+                    days,
+                    start,
+                    end
+                )
 
-    # Save to Google Sheets
-    try:
-
-        save_to_google_sheets([
-            roll_number,
-            name,
-            department,
-            room,
-            reason,
-            days,
-            start,
-            end,
-            parent_phone,
-            student_phone,
-            action,
-            datetime.now().strftime("%Y-%m-%d %H:%M")
-        ])
-
-    except Exception as e:
-        print("Sheet save failed:", e)
+    # SAVE TO GOOGLE SHEETS
+    save_to_google_sheets([
+        roll_number,
+        name,
+        department,
+        room,
+        reason,
+        days,
+        start,
+        end,
+        parent_phone,
+        student_phone,
+        action,
+        datetime.now().strftime("%Y-%m-%d %H:%M")
+    ])
 
     return redirect("/")
 
@@ -296,8 +278,7 @@ def add_student():
     cur = conn.cursor()
 
     cur.execute("""
-        INSERT INTO students (roll_number, name, department, room, student_phone, parent_phone)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO students VALUES (%s, %s, %s, %s, %s, %s)
         ON CONFLICT (roll_number) DO UPDATE
         SET name = EXCLUDED.name,
             department = EXCLUDED.department,
@@ -318,4 +299,4 @@ def add_student():
 # =====================================================
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
